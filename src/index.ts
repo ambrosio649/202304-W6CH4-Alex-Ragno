@@ -5,7 +5,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 4444;
+const PORT = process.env.PORT || 6555;
 const version = '1.0.0';
 
 program.option('-v, --version');
@@ -23,16 +23,40 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  const { pathname } = url.parse(req.url);
+  const { pathname, query } = url.parse(req.url);
+
+  const params = query;
+  const paramArr = params!.slice(params!.indexOf('?') + 1).split('&');
+  const a = paramArr[0].slice(paramArr.indexOf('='));
+  const b = paramArr[1].slice(paramArr.indexOf('='));
+
+  const addition = () => Number(a) + Number(b);
+  const substraction = () => Number(a) - Number(b);
+  const division = () => Number(a) / Number(b);
+  const multiplication = () => Number(a) * Number(b);
 
   if (req.method !== 'GET') {
     server.emit('error', new Error('Invalid method'));
     return;
   }
 
+  if (pathname !== '/calculator') {
+    server.emit('error', new Error('Path not found'));
+    res.write(`<h1>Error 404</h1><h2>Path not found</h2>`);
+    return;
+  }
+
   res.write(`<h1>Hola ${pathname!.toUpperCase()}</h1>`);
-  res.write(req.method);
-  res.write(req.url);
+  res.write(`<p>a = ${a}</p>`);
+  res.write(`<p>b = ${b}</p>`);
+
+  // Res.write(req.method);
+  // res.write(req.url);
+  res.write(`<p>${a} + ${b} = ${addition()}</p>`);
+  res.write(`<p>${a} - ${b} = ${substraction()}</p>`);
+  res.write(`<p>${a} / ${b} = ${division()}</p>`);
+  res.write(`<p>${a} * ${b} = ${multiplication()}</p>`);
+
   res.end();
 });
 
